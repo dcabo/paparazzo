@@ -26,19 +26,33 @@ class CasaRealSpider
   end
 
   def fetch(page_number)
-    # Get the page
+    # Get the page (unless we have it already)
+    target_folder = File.join(DATA_SUBDIR, page_number)
+    if File.exists? target_folder
+      puts "Skipping page #{page_number}..."
+      return
+    end
     puts "Fetching page #{page_number}..."
     page = @agent.get("http://www.casareal.es/ES/ArchivoMultimedia/Paginas/archivo-multimedia_galerias-de-fotos-detalle.aspx?data=#{page_number}")
-    page_title = page.at('h1').text
+
+    # And check it's not blank
+    page_title = page.at('h1') && page.at('h1').text
+    if page_title.nil?
+      # Create an empty file to avoid coming back next time. We could create an empty
+      # folder, but it's less comfortable for browsing later on
+      FileUtils.touch(target_folder)
+      return
+    end
 
     # ...and iterate through the pictures, storing metadata in a CSV file
-    CSV.open(File.join(DATA_SUBDIR, page_number, 'metadata.csv'), 'w') do |csv|
+    FileUtils.makedirs(target_folder)
+    CSV.open(File.join(target_folder, 'metadata.csv'), 'w') do |csv|
       page.links_with(:dom_class => 'highslide').each do |picture|
         puts "  Fetching picture #{File.basename(picture.href)}..."
 
         # Save the linked picture...
         file = picture.click()
-        file.save(File.join(DATA_SUBDIR, page_number, file.filename))
+        file.save(File.join(target_folder, file.filename))
 
         # ...and get some metadata
         parent = picture.attributes.parent
@@ -52,7 +66,6 @@ class CasaRealSpider
   end
 end
 
-page_number = '119572'
-unless File.exists? File.join(DATA_SUBDIR, page_number)
-  CasaRealSpider.new().fetch(page_number)
+119570.upto(119580) do |page_number|
+  CasaRealSpider.new().fetch(page_number.to_s)
 end
