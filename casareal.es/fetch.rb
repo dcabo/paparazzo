@@ -1,6 +1,10 @@
 #!/usr/bin/env ruby
 # encoding: UTF-8
 
+# Will fetch pictures from casareal.es galleries, going backwards in time from given starting point
+# Usage:
+#   fetch.rb <start_gallery_id>
+
 # Some sample galleries:
 #  - several pictures: http://www.casareal.es/ES/ArchivoMultimedia/Paginas/archivo-multimedia_galerias-de-fotos-detalle.aspx?data=119572
 #  - FIXME: only one picture: http://www.casareal.es/ES/ArchivoMultimedia/Paginas/archivo-multimedia_galerias-de-fotos-detalle.aspx?data=105971
@@ -67,8 +71,16 @@ class CasaRealSpider
   end
 end
 
+# Get starting point from command line
 # TODO: Should find out the latest available gallery (from main catalogue):
 # http://www.casareal.es/ES/ArchivoMultimedia/Paginas/archivo-multimedia_galerias-de-fotos.aspx
-119570.upto(119580) do |page_number|
-  CasaRealSpider.new().fetch(page_number.to_s)
+start_gallery_id = ARGV[0]
+if start_gallery_id.nil?
+  puts "Usage: fetch.rb <start_gallery_id>"
+else
+  spider = CasaRealSpider.new() 
+  Integer(start_gallery_id).downto(1) do |page_number|
+    spider.fetch(page_number.to_s)
+    sleep(2)
+  end
 end
