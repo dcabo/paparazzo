@@ -1,8 +1,9 @@
 #!/usr/bin/env ruby
 # encoding: UTF-8
 
-# Gallery with several pictures: http://www.casareal.es/ES/ArchivoMultimedia/Paginas/archivo-multimedia_galerias-de-fotos-detalle.aspx?data=119572
-# Gallery with only one picture: http://www.casareal.es/ES/ArchivoMultimedia/Paginas/archivo-multimedia_galerias-de-fotos-detalle.aspx?data=105971
+# Some sample galleries:
+#  - several pictures: http://www.casareal.es/ES/ArchivoMultimedia/Paginas/archivo-multimedia_galerias-de-fotos-detalle.aspx?data=119572
+#  - FIXME: only one picture: http://www.casareal.es/ES/ArchivoMultimedia/Paginas/archivo-multimedia_galerias-de-fotos-detalle.aspx?data=105971
 # The ID seems to start after 100000, haven't seen anything earlier than that
 
 require 'rubygems'
@@ -66,6 +67,8 @@ class CasaRealSpider
   end
 end
 
+# TODO: Should find out the latest available gallery (from main catalogue):
+# http://www.casareal.es/ES/ArchivoMultimedia/Paginas/archivo-multimedia_galerias-de-fotos.aspx
 119570.upto(119580) do |page_number|
   CasaRealSpider.new().fetch(page_number.to_s)
 end
