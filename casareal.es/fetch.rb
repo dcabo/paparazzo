@@ -52,20 +52,38 @@ class CasaRealSpider
     # ...and iterate through the pictures, storing metadata in a CSV file
     FileUtils.makedirs(target_folder)
     CSV.open(File.join(target_folder, 'metadata.csv'), 'w') do |csv|
-      page.links_with(:dom_class => 'highslide').each do |picture|
-        puts "  Fetching picture #{File.basename(picture.href)}..."
-
-        # Save the linked picture...
-        file = picture.click()
+      # Find out whether we have a gallery-type page, or just one picture
+      pictures = page.links_with(:dom_class => 'highslide')
+      if pictures.empty?
+        # Save the picture...
+        src = page.at('.detalleFoto img').attributes['src'].to_s
+        puts "  Fetching picture #{File.basename(src)}..."
+        file = page.image_with(:src => src).fetch
         file.save(File.join(target_folder, file.filename))
 
         # ...and get some metadata
-        parent = picture.attributes.parent
-        who = get_text(parent, 'span.who')
-        description = get_text(parent, 'p.desc')
-        location = get_text(parent, 'span.date')
+        footer = page.at('div.pieFoto')
+        who = get_text(footer, 'span.autor')
+        description = get_text(footer, 'h2.title')
+        location = get_text(footer, 'span.date')
 
-        csv << [page_number, page_title, file.filename, who, description, location]
+        csv << [page_number, page_title, file.uri.to_s, who, description, location]
+      else
+        pictures.each do |picture|
+          puts "  Fetching picture #{File.basename(picture.href)}..."
+
+          # Save the linked picture...
+          file = picture.click()
+          file.save(File.join(target_folder, file.filename))
+
+          # ...and get some metadata
+          parent = picture.attributes.parent
+          who = get_text(parent, 'span.who')
+          description = get_text(parent, 'p.desc')
+          location = get_text(parent, 'span.date')
+
+          csv << [page_number, page_title, file.uri.to_s, who, description, location]
+        end
       end
     end
   end
