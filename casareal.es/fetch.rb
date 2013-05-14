@@ -86,6 +86,8 @@ class CasaRealSpider
         end
       end
     end
+    
+    sleep(2)
   end
 end
 
@@ -99,6 +101,5 @@ else
   spider = CasaRealSpider.new() 
   Integer(start_gallery_id).downto(1) do |page_number|
     spider.fetch(page_number.to_s)
-    sleep(2)
   end
 end
