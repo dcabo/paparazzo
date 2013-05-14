@@ -1,0 +1,1 @@
+find data/. -name metadata.csv -exec cat \{\} \; > metadata.csv
